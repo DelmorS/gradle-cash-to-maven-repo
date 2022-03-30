@@ -3,19 +3,23 @@
 # History: 
 # [2019/05/31 11:27 AM] Created.
 # [2020/12/25 10:22 AM] "Cannot create a file when that file already exists" error fix.
+# [2022/03/30 07:58 PM] By Delmor_S. Replaced .gradle path with dynamic one
 #
-# Function: Convert android gradle cache into local maven repository.
+# Function: Converts .gradle cache into local maven repository.
 #           This local maven repository can be used in gradle offline build directly instead of gradle cache.
 
+from pathlib import Path
 import os
 from shutil import copyfile
 
 logging = False
-src = "E:/android/gradle_home/caches/modules-2/files-2.1/"
-dst = "E:/android/gradle_local_repo/"
+home = str(Path.home())
+
+src = home + "\\.gradle\\caches\\modules-2\\files-2.1\\"
+dst = "C:\\gradle_local_repo\\"
 
 group_count = 0
-artifect_count = 0
+artifact_count = 0
 
 def makedirs(path):
     if not os.path.exists(path):
@@ -30,32 +34,32 @@ def processGroup(group):
         print(group_dir)
     makedirs(dst + group_dir)
 
-    artifects = os.listdir(src + group)
-    for artifect in artifects:
-        processArtifect(group, group_dir, artifect)
+    artifacts = os.listdir(src + group)
+    for artifact in artifacts:
+        processArtifact(group, group_dir, artifact)
     return
 
-def processArtifect(group, group_dir, artifect):
-    global artifect_count
-    artifect_count = artifect_count + 1
-    artifect_dir = dst + group_dir + "/" + artifect
-    makedirs(artifect_dir)
+def processArtifact(group, group_dir, artifact):
+    global artifact_count
+    artifact_count = artifact_count + 1
+    artifact_dir = dst + group_dir + "/" + artifact
+    makedirs(artifact_dir)
     if (logging):
-        print(artifect)
+        print(artifact)
 
-    src_artifect_dir = src + group + "/" + artifect
-    versions = os.listdir(src_artifect_dir)
+    src_artifact_dir = src + group + "/" + artifact
+    versions = os.listdir(src_artifact_dir)
     for version in versions:
-        processVersion(group, artifect, artifect_dir, version)
+        processVersion(group, artifact, artifact_dir, version)
     return
 
-def processVersion(group, artifect, artifect_dir, version):
-    version_dir = artifect_dir + "/" + version
+def processVersion(group, artifact, artifact_dir, version):
+    version_dir = artifact_dir + "/" + version
     makedirs(version_dir)
     if (logging):
         print(version)
 
-    src_version_dir = src + group + "/" + artifect + "/" + version
+    src_version_dir = src + group + "/" + artifact + "/" + version
     hashs = os.listdir(src_version_dir)
     for hash in hashs:
         hash_dir = src_version_dir + "/" + hash
@@ -72,5 +76,5 @@ for group in groups:
     processGroup(group)
 
 print("Done!")
-print('Total {group_count} groups')
-print('Total {artifect_count} artifects')
+print(f'Total {group_count} groups')
+print(f'Total {artifact_count} artifacts')
